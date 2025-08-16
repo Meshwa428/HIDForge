@@ -41,6 +41,7 @@ BleHid::BleHid(String deviceName, String deviceManufacturer, uint8_t batteryLeve
     : hid(0), deviceName(String(deviceName).substring(0, 15)),
       deviceManufacturer(String(deviceManufacturer).substring(0, 15)), batteryLevel(batteryLevel) {}
 
+// ... (rest of BleHid.cpp is identical to the previous fixed version)
 void BleHid::begin(const uint8_t *layout) {
     _asciimap = layout;
     NimBLEDevice::init(deviceName.c_str());
@@ -247,13 +248,15 @@ void BleHid::onDisconnect(NimBLEServer *pServer) {
     ESP_LOGI(LOG_TAG, "Client disconnected");
 }
 
-void BleHid::onAuthenticationComplete(ble_gap_conn_desc* desc){
-    if(!desc->sec_state.encrypted){
+void BleHid::onAuthenticationComplete(ble_gap_conn_desc* desc) {
+    if (desc->sec_state.encrypted) {
+        ESP_LOGI(LOG_TAG, "Paired successfully.");
+        this->connected = true;
+    } else {
+        ESP_LOGE(LOG_TAG, "Pairing failed");
+        this->connected = false;
         NimBLEDevice::getServer()->disconnect(desc->conn_handle);
-        ESP_LOGE(LOG_TAG, "Encrypt connection failed: %s", NimBLEUtils::gap_evt_text(desc->reason));
-        return;
     }
-    ESP_LOGI(LOG_TAG, "Starting BLE work!");
 }
 
 void BleHid::onWrite(NimBLECharacteristic *me) {

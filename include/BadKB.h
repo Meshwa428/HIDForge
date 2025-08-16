@@ -1,5 +1,5 @@
-#ifndef BRUCE_BAD_USB_H
-#define BRUCE_BAD_USB_H
+#ifndef BAD_KB_H
+#define BAD_KB_H
 
 // Main public interface classes
 #include "UsbHid.h"
@@ -10,4 +10,4 @@
 #include "common/keys.h"
 #include "layouts/KeyboardLayout.h"
 
-#endif // BRUCE_BAD_USB_H
+#endif // BAD_KB_H

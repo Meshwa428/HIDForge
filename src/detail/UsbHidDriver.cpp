@@ -120,7 +120,7 @@ extern "C" uint16_t tusb_hid_load_descriptor(uint8_t * dst, uint8_t * itf)
     }
     tinyusb_hid_is_initialized = true;
 
-    uint8_t str_index = tinyusb_add_string_descriptor("BruceBadUSB HID");
+    uint8_t str_index = tinyusb_add_string_descriptor("BadKB HID"); // <-- RENAMED
     uint8_t ep_in = tinyusb_get_free_in_endpoint();
     TU_VERIFY (ep_in != 0);
     uint8_t ep_out = tinyusb_get_free_out_endpoint();

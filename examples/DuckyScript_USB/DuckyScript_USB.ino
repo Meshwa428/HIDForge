@@ -1,5 +1,5 @@
 #include <Arduino.h>
-#include <BruceBadUSB.h>
+#include <BadKB.h>
 
 UsbHid keyboard;
 
