@@ -120,7 +120,7 @@ extern "C" uint16_t tusb_hid_load_descriptor(uint8_t * dst, uint8_t * itf)
     }
     tinyusb_hid_is_initialized = true;
 
-    uint8_t str_index = tinyusb_add_string_descriptor("BadKB HID"); // <-- RENAMED
+    uint8_t str_index = tinyusb_add_string_descriptor("HIDForge HID");
     uint8_t ep_in = tinyusb_get_free_in_endpoint();
     TU_VERIFY (ep_in != 0);
     uint8_t ep_out = tinyusb_get_free_out_endpoint();
@@ -176,16 +176,13 @@ UsbHidDriver::UsbHidDriver(){
         tinyusb_hid_devices_num = 0;
         tinyusb_enable_interface(USB_INTERFACE_HID, TUD_HID_INOUT_DESC_LEN, tusb_hid_load_descriptor);
     }
-}
-
-void UsbHidDriver::begin(){
+    
     if(tinyusb_hid_device_input_sem == NULL){
         tinyusb_hid_device_input_sem = xSemaphoreCreateBinary();
     }
     if(tinyusb_hid_device_input_mutex == NULL){
         tinyusb_hid_device_input_mutex = xSemaphoreCreateMutex();
     }
-    USB.begin();
 }
 
 void UsbHidDriver::end(){

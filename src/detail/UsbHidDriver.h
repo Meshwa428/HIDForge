@@ -54,7 +54,6 @@ class UsbHidDriver
 {
 public:
     UsbHidDriver(void);
-    void begin(void);
     void end(void);
     bool ready(void);
     bool SendReport(uint8_t report_id, const void* data, size_t len, uint32_t timeout_ms = 100);

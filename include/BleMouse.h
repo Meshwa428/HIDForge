@@ -1,5 +1,5 @@
-#ifndef BLE_MOUSE_H
-#define BLE_MOUSE_H
+#ifndef HIDFORGE_BLE_MOUSE_H
+#define HIDFORGE_BLE_MOUSE_H
 
 #include "sdkconfig.h"
 #if defined(CONFIG_BT_ENABLED)
@@ -30,7 +30,7 @@ protected:
     virtual void onAuthenticationComplete(ble_gap_conn_desc* desc);
 
 public:
-    BleMouse(String deviceName = "BadKB Mouse", String deviceManufacturer = "BadKB", uint8_t batteryLevel = 100);
+    BleMouse(String deviceName = "HIDForge Mouse", String deviceManufacturer = "HIDForge", uint8_t batteryLevel = 100);
     
     void begin() override;
     void end() override;
@@ -46,4 +46,4 @@ public:
 };
 
 #endif // CONFIG_BT_ENABLED
-#endif // BLE_MOUSE_H
+#endif // HIDFORGE_BLE_MOUSE_H

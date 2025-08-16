@@ -1,5 +1,5 @@
-#ifndef BAD_KB_BLE_HID_H
-#define BAD_KB_BLE_HID_H
+#ifndef HIDFORGE_BLE_HID_H
+#define HIDFORGE_BLE_HID_H
 
 #include "sdkconfig.h"
 #if defined(CONFIG_BT_ENABLED)
@@ -39,7 +39,7 @@ protected:
     virtual void onWrite(NimBLECharacteristic* me) override;
 
 public:
-    BleHid(String deviceName = "BadKB", String deviceManufacturer = "BadKB", uint8_t batteryLevel = 100);
+    BleHid(String deviceName = "HIDForge", String deviceManufacturer = "HIDForge", uint8_t batteryLevel = 100);
     
     void begin(const uint8_t *layout = KeyboardLayout_en_US) override;
     void end(void) override;
@@ -69,4 +69,4 @@ public:
 };
 
 #endif // CONFIG_BT_ENABLED
-#endif // BAD_KB_BLE_HID_H
+#endif // HIDFORGE_BLE_HID_H

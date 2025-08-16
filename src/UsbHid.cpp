@@ -26,7 +26,7 @@ uint16_t UsbHid::_onGetDescriptor(uint8_t* dst){
 
 void UsbHid::begin(const uint8_t *layout){
     _asciimap = layout;
-    hid.begin();
+    // The USB stack is started by calling USB.begin() globally
 }
 
 void UsbHid::end(){

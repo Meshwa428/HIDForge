@@ -20,7 +20,7 @@ uint16_t UsbMouse::_onGetDescriptor(uint8_t *dst) {
 }
 
 void UsbMouse::begin() {
-    hid.begin();
+    // The USB stack is started by calling USB.begin() globally
 }
 
 void UsbMouse::end() {

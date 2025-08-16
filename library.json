@@ -1,11 +1,11 @@
 {
   "name": "HIDForge",
-  "version": "0.0.1",
-  "description": "A comprehensive library for creating USB and BLE HID devices (Bad USB) on ESP32, extracted from the Bruce project.",
-  "keywords": "hid, keyboard, ble, usb, security, esp32",
+  "version": "0.1.0",
+  "description": "A comprehensive library for creating USB (HID, MSC) and BLE HID devices on ESP32.",
+  "keywords": "hid, keyboard, mouse, msc, sd card, ble, usb, security, esp32",
   "repository": {
     "type": "git",
-    "url": "https://github.com/Meshwa428/BadKB.git"
+    "url": "https://github.com/Meshwa428/HIDForge.git"
   },
   "authors": [
     {

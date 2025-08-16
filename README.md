@@ -4,6 +4,8 @@
 
 **HIDForge** is a powerful and flexible Arduino library for the ESP32, designed for creating custom Human Interface Devices (HID). Emulate keyboards and mice over both **USB** and **Bluetooth LE (BLE)** with a clean, object-oriented API.
 
+This library now also supports creating **composite USB devices**, allowing you to combine HID functionality with a **Mass Storage Class (MSC)** device to access an SD card directly over USB.
+
 Whether you're building a custom macro pad, an automation tool, an assistive device, or a security research tool, HIDForge provides the foundation you need to bring your project to life.
 
 <br>
@@ -12,7 +14,8 @@ Whether you're building a custom macro pad, an automation tool, an assistive dev
 
 -   ✅ **Easy to Use:** A simple, intuitive API gets your project running in minutes.
 -   🔌 **Dual Connectivity:** Create devices that work over a wired **USB** connection or wirelessly with **Bluetooth LE**.
--   🏛️ **Modern C++ Design:** Clean `UsbHid`, `BleHid`, `UsbMouse`, and `BleMouse` classes make your code readable and maintainable.
+-   💾 **Composite Device Support:** Combine Keyboard, Mouse, and an SD Card Reader (MSC) into a single USB device.
+-   🏛️ **Modern C++ Design:** Clean `UsbHid`, `BleHid`, `UsbMouse`, `BleMouse`, and `UsbMsc` classes make your code readable and maintainable.
 -   🌍 **International Support:** Comes with a wide range of keyboard layouts (US, UK, DE, FR, ES, etc.) for global compatibility.
 -   🖱️ **Full HID Emulation:** Offers complete control over keyboard (keystrokes, modifiers, media keys) and mouse (movement, clicks, scrolling) actions.
 -   ⚡ **High Performance:** Built with efficient code and a self-contained TinyUSB driver for USB, ensuring responsive performance.
@@ -21,9 +24,9 @@ Whether you're building a custom macro pad, an automation tool, an assistive dev
 
 *   **Custom Macro Pads:** For streaming, video editing, or programming.
 *   **System Automation:** Automate repetitive tasks on any computer.
-*   **Assistive Technology:** Build custom input devices for accessibility.
-*   **Unique Presentation Clickers** and remote controls.
-*   **Security Research:** Simulate keyboard and mouse actions for "BadUSB"-style scenarios.
+*   **"BadUSB" devices with payloads** stored on an accessible SD card.
+*   **Data Loggers** that can present their data as a simple USB drive.
+*   **Security Research:** Simulate keyboard and mouse actions for advanced scenarios.
 
 ## Quick Start
 
@@ -39,6 +42,7 @@ lib_deps = https://github.com/Meshwa428/HIDForge.git
 1.  Download the latest release ZIP file from the [Releases](https://github.com/Meshwa428/HIDForge/releases) page.
 2.  In the Arduino IDE, go to `Sketch > Include Library > Add .ZIP Library...` and select the downloaded file.
 3.  Install the `NimBLE-Arduino` library from the Library Manager.
+4.  Ensure you have the latest ESP32 board package, which includes the `SD` and `FS` libraries.
 
 ### 2. Basic USB Keyboard Example
 
@@ -57,9 +61,13 @@ void setup() {
 
   // 2. Initialize the keyboard with the US English layout
   keyboard.begin(KeyboardLayout_en_US);
+
+  // 3. Start the USB stack
+  USB.begin();
+
   Serial.println("Starting USB Keyboard Example...");
 
-  // 3. Wait for the host computer to recognize the device
+  // 4. Wait for the host computer to recognize the device
   while(!keyboard.isConnected()) {
     delay(100);
   }
@@ -67,7 +75,7 @@ void setup() {
   Serial.println("USB HID Connected. Typing in 3 seconds...");
   delay(3000); // Give yourself time to open a text editor
 
-  // 4. Send keystrokes
+  // 5. Send keystrokes
   keyboard.println("Hello from HIDForge!");
   
   // Use modifier keys to open the Run dialog (Win + R)
@@ -122,7 +130,7 @@ void loop() {
 }
 ```
 
-Check out the `examples/` directory for more, including DuckyScript players and other advanced use cases!
+Check out the `examples/` directory for more, including the new **Composite_HID_MSC** example!
 
 ## API Reference
 
@@ -131,10 +139,12 @@ Check out the `examples/` directory for more, including DuckyScript players and 
 ### Core Classes
 -   `UsbHid` / `BleHid`: For keyboard emulation over USB or BLE.
 -   `UsbMouse` / `BleMouse`: For mouse emulation over USB or BLE.
+-   `UsbMsc`: For SD card mass storage emulation over USB.
 
 ### Key Methods
 
--   `begin()`: Initializes the HID device. For keyboards, you can pass a layout (e.g., `KeyboardLayout_de_DE`).
+-   `begin()`: Initializes the HID device. For keyboards, you can pass a layout (e.g., `KeyboardLayout_de_DE`). For `UsbMsc`, you pass a pointer to an `SDCard` object.
+-   `USB.begin()`: **(New)** After configuring all desired USB components (`UsbHid`, `UsbMouse`, `UsbMsc`), call this once to start the USB stack.
 -   `isConnected()`: Returns `true` if a host computer is connected.
 -   `press(KEY_CODE)`: Presses and holds a key (e.g., `KEY_LEFT_CTRL`, `'a'`).
 -   `release(KEY_CODE)`: Releases a key.
@@ -151,7 +161,7 @@ Contributions are welcome! Whether it's adding a new keyboard layout, fixing a b
 
 ## Acknowledgements
 
-HIDForge is built by extracting HID code from the excellent work of the [Bruce project](https://github.com/pr3y/Bruce), from which its core HID logic was extracted and refactored. It also relies on the `NimBLE-Arduino` library for its Bluetooth capabilities and the `TinyUSB` stack for its USB implementation.
+HIDForge is built by extracting HID code from the excellent work of the [Bruce project](https://github.com/pr3y/Bruce), from which its core HID logic was extracted and refactored. It also relies on the `NimBLE-Arduino` library for its Bluetooth capabilities and the `TinyUSB` stack for its USB implementation. The MSC functionality is based on work from the [ESP32-S3 SD Card Performance Tests](https://github.com/atomic14/esp32-s3-sdcard) project.
 
 ## License
 

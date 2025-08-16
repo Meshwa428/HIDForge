@@ -1,16 +1,27 @@
-#ifndef BAD_KB_H
-#define BAD_KB_H
+#ifndef HIDFORGE_H
+#define HIDFORGE_H
+
+#include <Arduino.h>
+#include "USB.h"
 
 // Main public interface classes
 #include "UsbHid.h"
 #include "BleHid.h"
-#include "UsbMouse.h"      // New
-#include "BleMouse.h"      // New
+#include "UsbMouse.h"
+#include "BleMouse.h"
+#include "UsbMsc.h"
 #include "HIDInterface.h"
-#include "MouseInterface.h"// New
+#include "MouseInterface.h"
 
 // Common definitions and layouts
 #include "common/keys.h"
 #include "layouts/KeyboardLayout.h"
 
-#endif // BAD_KB_H
+// SD Card related includes for UsbMsc
+#include "msc/SDCard.h"
+#include "msc/SDCardArduino.h"
+#include "msc/SDCardIdf.h"
+#include "msc/SDCardLazyWrite.h"
+#include "msc/SDCardMultiSector.h"
+
+#endif // HIDFORGE_H
