@@ -102,4 +102,11 @@ const MediaKeyReport KEY_MEDIA_WWW_BACK = {0, 32};
 const MediaKeyReport KEY_MEDIA_CONSUMER_CONTROL_CONFIGURATION = {0, 64}; // Media Selection
 const MediaKeyReport KEY_MEDIA_EMAIL_READER = {0, 128};
 
-#endif
+#define MOUSE_LEFT 0x01
+#define MOUSE_RIGHT 0x02
+#define MOUSE_MIDDLE 0x04
+#define MOUSE_BACKWARD 0x08
+#define MOUSE_FORWARD 0x10
+#define MOUSE_ALL 0x1F
+
+#endif // KEYS_H
