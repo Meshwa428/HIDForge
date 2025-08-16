@@ -239,8 +239,9 @@ size_t BleHid::write(const uint8_t *buffer, size_t size) {
 }
 
 void BleHid::onConnect(NimBLEServer *pServer) {
-    this->connected = true;
-    ESP_LOGI(LOG_TAG, "Client connected");
+    // A client has connected at the link layer, but we are not ready for HID yet.
+    // Wait for the onAuthenticationComplete callback.
+    ESP_LOGI(LOG_TAG, "Client connection initiated, waiting for pairing...");
 }
 
 void BleHid::onDisconnect(NimBLEServer *pServer) {
@@ -250,7 +251,7 @@ void BleHid::onDisconnect(NimBLEServer *pServer) {
 
 void BleHid::onAuthenticationComplete(ble_gap_conn_desc* desc) {
     if (desc->sec_state.encrypted) {
-        ESP_LOGI(LOG_TAG, "Paired successfully.");
+        ESP_LOGI(LOG_TAG, "Paired successfully. HID ready.");
         this->connected = true;
     } else {
         ESP_LOGE(LOG_TAG, "Pairing failed");
