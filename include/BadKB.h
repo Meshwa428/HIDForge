@@ -4,7 +4,10 @@
 // Main public interface classes
 #include "UsbHid.h"
 #include "BleHid.h"
+#include "UsbMouse.h"      // New
+#include "BleMouse.h"      // New
 #include "HIDInterface.h"
+#include "MouseInterface.h"// New
 
 // Common definitions and layouts
 #include "common/keys.h"
