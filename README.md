@@ -1,72 +1,85 @@
-# BruceBadUSB Library
+# HIDForge: The ESP32 HID Emulation Library
 
-BruceBadUSB is a powerful and flexible library for the ESP32, designed to create USB and Bluetooth LE (BLE) Human Interface Devices (HID), commonly known as "Bad USBs". Extracted and refactored from the versatile [Bruce project](https://github.com/pr3y/Bruce), this library provides a clean, object-oriented interface for emulating keyboards over both wired and wireless connections.
+[![GitHub stars](https://img.shields.io/github/stars/Meshwa428/HIDForge?style=social)](https://github.com/Meshwa428/HIDForge/stargazers)
 
-## Features
+**HIDForge** is a powerful and flexible Arduino library for the ESP32, designed for creating custom Human Interface Devices (HID). Emulate keyboards and mice over both **USB** and **Bluetooth LE (BLE)** with a clean, object-oriented API.
 
-- **Dual Mode:** Supports both USB and BLE HID keyboard emulation.
-- **Object-Oriented:** Clean `UsbHid` and `BleHid` classes inheriting from a common `HIDInterface`.
-- **Multi-Language Support:** Includes a wide range of keyboard layouts (US, UK, DE, FR, ES, IT, and more).
-- **Rich Keystroke Support:** Emulate printing characters, modifier keys (Ctrl, Alt, Shift, GUI), and media keys.
-- **DuckyScript Ready:** Easily integrate with DuckyScript interpreters for automated keystroke injection attacks (see examples).
-- **Self-Contained:** The USB implementation includes its own TinyUSB driver wrapper, minimizing external dependencies.
+Whether you're building a custom macro pad, an automation tool, an assistive device, or a security research tool, HIDForge provides the foundation you need to bring your project to life.
 
-## Library Structure
+<br>
 
-- `src/`: Contains all the source code for the library.
-  - `BruceBadUSB.h`: Main header file to include in your project.
-  - `UsbHid.h`/`.cpp`: Class for USB HID keyboard emulation.
-  - `BleHid.h`/`.cpp`: Class for BLE HID keyboard emulation.
-  - `HIDInterface.h`: Abstract base class defining the common keyboard API.
-  - `layouts/`: Keyboard layout definitions.
-  - `common/`: Shared key code definitions.
-- `examples/`: Ready-to-use examples.
-  - `HelloWorld_USB`: A simple example to type "Hello World!" over USB.
-  - `DuckyScript_USB`: A DuckyScript player that reads commands from a string and executes them over USB.
-  - `DuckyScript_BLE`: A DuckyScript player that reads commands from a string and executes them over BLE.
+## Why Choose HIDForge?
+
+-   ✅ **Easy to Use:** A simple, intuitive API gets your project running in minutes.
+-   🔌 **Dual Connectivity:** Create devices that work over a wired **USB** connection or wirelessly with **Bluetooth LE**.
+-   🏛️ **Modern C++ Design:** Clean `UsbHid`, `BleHid`, `UsbMouse`, and `BleMouse` classes make your code readable and maintainable.
+-   🌍 **International Support:** Comes with a wide range of keyboard layouts (US, UK, DE, FR, ES, etc.) for global compatibility.
+-   🖱️ **Full HID Emulation:** Offers complete control over keyboard (keystrokes, modifiers, media keys) and mouse (movement, clicks, scrolling) actions.
+-   ⚡ **High Performance:** Built with efficient code and a self-contained TinyUSB driver for USB, ensuring responsive performance.
+
+## Ideal For
+
+*   **Custom Macro Pads:** For streaming, video editing, or programming.
+*   **System Automation:** Automate repetitive tasks on any computer.
+*   **Assistive Technology:** Build custom input devices for accessibility.
+*   **Unique Presentation Clickers** and remote controls.
+*   **Security Research:** Simulate keyboard and mouse actions for "BadUSB"-style scenarios.
 
 ## Quick Start
 
 ### 1. Installation
 
-Place the `BruceBadUSB` folder into your PlatformIO `lib` directory. PlatformIO will automatically detect the library and its dependencies (`h2zero/NimBLE-Arduino`).
+**PlatformIO (Recommended):**
+Add `HIDForge` to your `platformio.ini` `lib_deps` or install via the PlatformIO CLI. The library and its dependencies (`h2zero/NimBLE-Arduino`) will be handled automatically.
+```ini
+lib_deps = https://github.com/Meshwa428/HIDForge.git
+```
+
+**Arduino IDE:**
+1.  Download the latest release ZIP file from the [Releases](https://github.com/Meshwa428/HIDForge/releases) page.
+2.  In the Arduino IDE, go to `Sketch > Include Library > Add .ZIP Library...` and select the downloaded file.
+3.  Install the `NimBLE-Arduino` library from the Library Manager.
 
 ### 2. Basic USB Keyboard Example
 
-This example demonstrates how to type a simple message using the `UsbHid` class.
+This example demonstrates how to create a USB keyboard that types a message and opens Notepad on Windows.
 
 ```cpp
 #include <Arduino.h>
-#include <BruceBadUSB.h>
+#include <HIDForge.h> // The main library header
 
+// 1. Create an instance of the UsbHid class
 UsbHid keyboard;
 
 void setup() {
   Serial.begin(115200);
-  delay(1000); // Wait for Serial to be ready
+  delay(1000); // Wait for Serial
 
-  // Use the default US keyboard layout
+  // 2. Initialize the keyboard with the US English layout
   keyboard.begin(KeyboardLayout_en_US);
+  Serial.println("Starting USB Keyboard Example...");
 
-  Serial.println("Starting USB Keyboard Test...");
-
-  // Wait until the USB device is connected and ready
+  // 3. Wait for the host computer to recognize the device
   while(!keyboard.isConnected()) {
     delay(100);
   }
   
-  Serial.println("Typing...");
+  Serial.println("USB HID Connected. Typing in 3 seconds...");
+  delay(3000); // Give yourself time to open a text editor
 
-  delay(2000); // Give yourself time to open a text editor
+  // 4. Send keystrokes
+  keyboard.println("Hello from HIDForge!");
   
-  keyboard.println("Hello from BruceBadUSB!");
-  keyboard.press(KEY_LEFT_GUI);
+  // Use modifier keys to open the Run dialog (Win + R)
+  keyboard.press(KEY_LEFT_GUI); // Press the Windows/Command key
   keyboard.press('r');
-  keyboard.releaseAll();
+  keyboard.releaseAll();        // Release all currently pressed keys
+  
   delay(500);
+  
+  // Type a command and press Enter
   keyboard.println("notepad.exe");
-  keyboard.press(KEY_RETURN);
-  keyboard.release(KEY_RETURN);
+  keyboard.write(KEY_RETURN); // write() is a press and immediate release
 }
 
 void loop() {
@@ -74,7 +87,76 @@ void loop() {
 }
 ```
 
-## Disclaimer
+### 3. Basic BLE Mouse Example
 
-This library is intended for educational purposes, security research, and professional testing only. Unauthorized use of this software to access or damage computer systems is illegal. The authors are not responsible for any misuse of this library.
+This example creates a wireless mouse that moves in a circle when a device is connected.
+
+```cpp
+#include <Arduino.h>
+#include <HIDForge.h>
+
+// 1. Create a BLE mouse instance with a custom name
+BleMouse mouse("HIDForge BLE Mouse");
+
+void setup() {
+  Serial.begin(115200);
+  delay(1000);
+
+  // 2. Initialize the mouse. This starts BLE advertising.
+  mouse.begin();
+  Serial.println("Starting BLE Mouse Example...");
+  Serial.println("Waiting for a device to connect and pair...");
+}
+
+void loop() {
+  // 3. Check if a host is connected
+  if (mouse.isConnected()) {
+    // Move the mouse in a circle
+    for (int i = 0; i < 360; i += 15) {
+      int x = 20 * cos(i * PI / 180);
+      int y = 20 * sin(i * PI / 180);
+      mouse.move(x, y);
+      delay(50);
+    }
+  }
+}
 ```
+
+Check out the `examples/` directory for more, including DuckyScript players and other advanced use cases!
+
+## API Reference
+
+(A more detailed API reference can be found in the project's documentation)
+
+### Core Classes
+-   `UsbHid` / `BleHid`: For keyboard emulation over USB or BLE.
+-   `UsbMouse` / `BleMouse`: For mouse emulation over USB or BLE.
+
+### Key Methods
+
+-   `begin()`: Initializes the HID device. For keyboards, you can pass a layout (e.g., `KeyboardLayout_de_DE`).
+-   `isConnected()`: Returns `true` if a host computer is connected.
+-   `press(KEY_CODE)`: Presses and holds a key (e.g., `KEY_LEFT_CTRL`, `'a'`).
+-   `release(KEY_CODE)`: Releases a key.
+-   `releaseAll()`: Releases all currently held keys.
+-   `write(KEY_CODE)`: Presses and immediately releases a key.
+-   `print("...")` / `println("...")`: Types a string of text.
+-   `move(x, y, wheel, hWheel)`: Moves the mouse cursor and scrolls the wheel.
+
+A full list of key codes can be found in `src/common/keys.h`.
+
+## Contributing
+
+Contributions are welcome! Whether it's adding a new keyboard layout, fixing a bug, or improving documentation, please feel free to open a pull request or issue.
+
+## Acknowledgements
+
+HIDForge is built by extracting HID code from the excellent work of the [Bruce project](https://github.com/pr3y/Bruce), from which its core HID logic was extracted and refactored. It also relies on the `NimBLE-Arduino` library for its Bluetooth capabilities and the `TinyUSB` stack for its USB implementation.
+
+## License
+
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
+
+---
+### Disclaimer
+This library is a powerful tool intended for learning, professional testing, and creative projects. Misuse of this software to access or damage computer systems without authorization is illegal. The authors are not responsible for any damage or illegal activities caused by the use of this library.
