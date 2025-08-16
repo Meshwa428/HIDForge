@@ -1,0 +1,42 @@
+# General
+.DS_Store
+.svn
+.hg
+*.swp
+*~
+*.bak
+*.orig
+
+# PlatformIO
+.pio/
+.vscode/
+.idea/
+*.vscode
+*.pioenvs
+*.piolibdeps
+.piopm
+.cproject
+.project
+.settings
+*.[oa]
+*.a
+*.so
+*.elf
+*.bin
+*.hex
+*.map
+*.exe
+
+# Build files
+*.o
+*.d
+*.dep
+*.out
+
+# Cache and temporary files
+build/
+dist/
+*.pyc
+*.pyo
+__pycache__/
+*.log
