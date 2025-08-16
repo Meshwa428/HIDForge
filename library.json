@@ -1,0 +1,29 @@
+{
+  "name": "BruceBadUSB",
+  "version": "1.0.0",
+  "description": "A comprehensive library for creating USB and BLE HID devices (Bad USB) on ESP32, extracted from the Bruce project.",
+  "keywords": "hid, badusb, keyboard, ble, usb, security, esp32",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Meshwa428/BruceBadUSB.git"
+  },
+  "authors": [
+    {
+      "name": "Bruce Firmware Authors",
+      "url": "https://bruce.computer"
+    },
+    {
+      "name": "Meshwa",
+      "email": "meshupatel2847@gmail.com"
+    }
+  ],
+  "license": "GPL-2.1-or-later",
+  "frameworks": "arduino",
+  "platforms": "espressif32",
+  "dependencies": {
+    "h2zero/NimBLE-Arduino": "^1.4.0"
+  },
+  "build": {
+    "libArchive": false
+  }
+}
