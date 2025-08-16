@@ -9,10 +9,10 @@
 // Using an incorrect pinout will prevent the SD card from working.
 
 // For SPI Mode
-#define SD_CS   21
-#define SD_SCK  7
-#define SD_MISO 8
-#define SD_MOSI 9
+#define SD_CS   GPIO_NUM_21
+#define SD_SCK  GPIO_NUM_7
+#define SD_MISO GPIO_NUM_8
+#define SD_MOSI GPIO_NUM_9
 
 // For SDIO/SD_MMC Mode (usually much faster)
 // #define SD_CLK  GPIO_NUM_36
