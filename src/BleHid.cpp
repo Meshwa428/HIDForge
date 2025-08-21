@@ -38,10 +38,9 @@ static const uint8_t _hidReportDescriptor[] = {
 };
 
 BleHid::BleHid(String deviceName, String deviceManufacturer, uint8_t batteryLevel)
-    : hid(0), deviceName(String(deviceName).substring(0, 15)),
-      deviceManufacturer(String(deviceManufacturer).substring(0, 15)), batteryLevel(batteryLevel) {}
+    : hid(0), deviceName(deviceName),
+      deviceManufacturer(deviceManufacturer), batteryLevel(batteryLevel) {}
 
-// ... (rest of BleHid.cpp is identical to the previous fixed version)
 void BleHid::begin(const uint8_t *layout) {
     _asciimap = layout;
     NimBLEDevice::init(deviceName.c_str());
