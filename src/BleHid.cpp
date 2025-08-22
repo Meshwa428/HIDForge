@@ -8,9 +8,9 @@ BleHid::~BleHid() {
 }
 
 void BleHid::begin(const uint8_t *layout) {
-    if (bleKeyboard_) {
-        setLayout(layout);
-    }
+    // The BleKeyboard object is already begun by the BleManager.
+    // We just set the layout here.
+    setLayout(layout);
 }
 
 void BleHid::end() {
@@ -44,6 +44,13 @@ size_t BleHid::release(uint8_t k) {
 
 size_t BleHid::releaseRaw(uint8_t k) {
     return release(k);
+}
+
+size_t BleHid::release(const MediaKeyReport k) {
+    if (bleKeyboard_) {
+        return bleKeyboard_->release(k);
+    }
+    return 0;
 }
 
 void BleHid::releaseAll() {
@@ -81,8 +88,6 @@ bool BleHid::isConnected() {
 }
 
 void BleHid::setLayout(const uint8_t *layout) {
-    if (bleKeyboard_) {
-        bleKeyboard_->setLayout(layout);
-    }
-    _asciimap = layout;
+    // This function is here to satisfy the HIDInterface, but it does nothing,
+    // because the user-provided BleKeyboard does not support layouts.
 }

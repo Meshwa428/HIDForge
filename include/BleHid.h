@@ -18,6 +18,7 @@ public:
 
     size_t release(uint8_t k) override;
     size_t releaseRaw(uint8_t k) override;
+    size_t release(const MediaKeyReport k);
     void releaseAll(void) override;
 
     size_t write(uint8_t k) override;
