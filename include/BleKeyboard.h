@@ -47,7 +47,9 @@ public:
   void sendReport(MediaKeyReport* keys);
   size_t press(uint8_t k);
   size_t press(const MediaKeyReport k);
+  size_t pressRaw(uint8_t k);
   size_t release(uint8_t k);
+  size_t releaseRaw(uint8_t k);
   size_t release(const MediaKeyReport k);
   size_t write(uint8_t c);
   size_t write(const MediaKeyReport c);

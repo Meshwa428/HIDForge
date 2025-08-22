@@ -77,7 +77,7 @@ void setup() {
   Serial.begin(115200);
   delay(1000);
 
-  bleManager.setup(nullptr);
+  bleManager.setup();
   BleKeyboard* keyboard = bleManager.startKeyboard();
 
   if (keyboard) {

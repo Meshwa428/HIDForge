@@ -25,7 +25,10 @@ size_t BleHid::press(uint8_t k) {
 }
 
 size_t BleHid::pressRaw(uint8_t k) {
-    return press(k);
+    if (bleKeyboard_) {
+        return bleKeyboard_->pressRaw(k);
+    }
+    return 0;
 }
 
 size_t BleHid::press(const MediaKeyReport k) {
@@ -43,7 +46,10 @@ size_t BleHid::release(uint8_t k) {
 }
 
 size_t BleHid::releaseRaw(uint8_t k) {
-    return release(k);
+    if (bleKeyboard_) {
+        return bleKeyboard_->releaseRaw(k);
+    }
+    return 0;
 }
 
 size_t BleHid::release(const MediaKeyReport k) {

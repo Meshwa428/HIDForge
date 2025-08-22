@@ -402,6 +402,44 @@ size_t BleKeyboard::press(const MediaKeyReport k)
 	return 1;
 }
 
+size_t BleKeyboard::pressRaw(uint8_t k)
+{
+	uint8_t i;
+	if (_keyReport.keys[0] != k && _keyReport.keys[1] != k &&
+		_keyReport.keys[2] != k && _keyReport.keys[3] != k &&
+		_keyReport.keys[4] != k && _keyReport.keys[5] != k) {
+
+		for (i=0; i<6; i++) {
+			if (_keyReport.keys[i] == 0x00) {
+				_keyReport.keys[i] = k;
+				break;
+			}
+		}
+		if (i == 6) {
+			return 0;
+		}
+	}
+	sendReport(&_keyReport);
+	return 1;
+}
+
+size_t BleKeyboard::releaseRaw(uint8_t k)
+{
+	uint8_t i;
+	for (i=0; i<6; i++) {
+		if (0 != k && _keyReport.keys[i] == k) {
+			_keyReport.keys[i] = 0x00;
+		}
+	}
+
+	sendReport(&_keyReport);
+	return 1;
+}
+
+void BleKeyboard::setWriteError(void) {
+  // This is a no-op to match the user's provided code.
+}
+
 // release() takes the specified key out of the persistent key report and
 // sends the report.  This tells the OS the key is no longer pressed and that
 // it shouldn't be repeated any more.
