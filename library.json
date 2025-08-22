@@ -23,6 +23,31 @@
     "h2zero/NimBLE-Arduino": "^1.4.3"
   },
   "build": {
-    "libArchive": false
+    "libArchive": false,
+    "srcFilter": [
+      "+<*>",
+      "-<examples/>",
+      "-<tests/>"
+    ],
+    "headers": [
+      "BleHid.h",
+      "BleKeyboard.h",
+      "BleManager.h",
+      "BleMouse.h",
+      "HIDForge.h",
+      "HIDInterface.h",
+      "MouseInterface.h",
+      "UsbHid.h",
+      "UsbMouse.h",
+      "UsbMsc.h",
+      "common/keys.h",
+      "detail/UsbHidDriver.h",
+      "layouts/KeyboardLayout.h",
+      "msc/SDCard.h",
+      "msc/SDCardArduino.h",
+      "msc/SDCardIdf.h",
+      "msc/SDCardLazyWrite.h",
+      "msc/SDCardMultiSector.h"
+    ]
   }
 }

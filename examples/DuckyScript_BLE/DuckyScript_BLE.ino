@@ -1,7 +1,12 @@
 #include <Arduino.h>
-#include <BadKB.h>
+#include "BleManager.h"
+#include "BleKeyboard.h"
+#include "BleHid.h"
+#include "HIDInterface.h"
+#include "layouts/KeyboardLayout.h"
 
-BleHid keyboard("DuckyBLE");
+
+BleManager bleManager;
 
 // A simple DuckyScript to be executed
 const char* duckyScript = R"SCRIPT(
@@ -72,18 +77,29 @@ void setup() {
   Serial.begin(115200);
   delay(1000);
 
-  keyboard.begin(KeyboardLayout_en_US);
-  Serial.println("Starting DuckyScript over BLE...");
-  Serial.println("Waiting for a device to connect...");
+  bleManager.setup(nullptr);
+  BleKeyboard* keyboard = bleManager.startKeyboard();
 
-  while(!keyboard.isConnected()) {
-    delay(100);
+  if (keyboard) {
+    BleHid hid(keyboard);
+    hid.begin(KeyboardLayout_en_US);
+
+    Serial.println("Starting DuckyScript over BLE...");
+    Serial.println("Waiting for a device to connect...");
+
+    while(!hid.isConnected()) {
+        delay(100);
+    }
+
+    Serial.println("BLE Keyboard Connected. Running script in 3 seconds...");
+    delay(3000);
+
+    parseDuckyScript(hid, duckyScript);
+
+  } else {
+    Serial.println("Failed to start keyboard");
   }
 
-  Serial.println("BLE Keyboard Connected. Running script in 3 seconds...");
-  delay(3000);
-
-  parseDuckyScript(keyboard, duckyScript);
 
   Serial.println("Script finished.");
 }

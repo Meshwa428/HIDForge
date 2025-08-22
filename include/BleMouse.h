@@ -14,7 +14,6 @@ private:
     NimBLEHIDDevice* hid;
     NimBLECharacteristic* inputMouse;
     NimBLEAdvertising* advertising;
-    NimBLEServer* pServer;
     
     uint8_t _buttons;
     bool connected = false;

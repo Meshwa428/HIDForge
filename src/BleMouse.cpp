@@ -49,8 +49,11 @@ BleMouse::BleMouse(String deviceName, String deviceManufacturer, uint8_t battery
     : hid(0), deviceName(deviceName), deviceManufacturer(deviceManufacturer), batteryLevel(batteryLevel), _buttons(0) {}
 
 void BleMouse::begin() {
-    NimBLEDevice::init(deviceName.c_str());
-    pServer = NimBLEDevice::createServer();
+    NimBLEServer* pServer = NimBLEDevice::getServer();
+    if (pServer == nullptr) {
+        ESP_LOGE(LOG_TAG, "BLE Server not found. Please start BleManager first.");
+        return;
+    }
     pServer->setCallbacks(this);
 
     hid = new NimBLEHIDDevice(pServer);
@@ -59,8 +62,6 @@ void BleMouse::begin() {
     hid->manufacturer()->setValue(deviceManufacturer.c_str());
     hid->pnp(0x02, 0x05ac, 0x0220, 0x011b); // Apple Inc, Magic Mouse
     hid->hidInfo(0x00, 0x02);
-
-    NimBLEDevice::setSecurityAuth(true, true, true);
 
     hid->reportMap((uint8_t*)_hidReportDescriptor, sizeof(_hidReportDescriptor));
     hid->startServices();
@@ -74,11 +75,21 @@ void BleMouse::begin() {
 }
 
 void BleMouse::end() {
-    if (pServer->getConnectedCount() > 0) {
-        pServer->disconnect(pServer->getPeerInfo(0).getConnHandle());
+    NimBLEServer* pServer = NimBLEDevice::getServer();
+    if (pServer && hid) {
+        pServer->setCallbacks(nullptr);
+
+        NimBLEService* hidService = hid->getHidService();
+        NimBLEService* deviceInfoService = hid->getDeviceInfoService();
+        NimBLEService* batteryService = hid->getBatteryService();
+
+        if (hidService) pServer->removeService(hidService, true);
+        if (deviceInfoService) pServer->removeService(deviceInfoService, true);
+        if (batteryService) pServer->removeService(batteryService, true);
+
+        delete hid;
+        hid = nullptr;
     }
-    delete hid;
-    NimBLEDevice::deinit(true);
     this->connected = false;
 }
 
