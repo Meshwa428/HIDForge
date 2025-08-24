@@ -27,7 +27,7 @@ private:
 protected:
     void onConnect(NimBLEServer* pServer, NimBLEConnInfo& connInfo) override;
     void onDisconnect(NimBLEServer* pServer, NimBLEConnInfo& connInfo, int reason) override;
-    virtual void onAuthenticationComplete(ble_gap_conn_desc* desc);
+    void onAuthenticationComplete(ble_gap_conn_desc* desc);
 
 public:
     BleMouse(String deviceName = "HIDForge Mouse", String deviceManufacturer = "HIDForge", uint8_t batteryLevel = 100);
