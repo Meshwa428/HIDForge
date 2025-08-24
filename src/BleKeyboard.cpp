@@ -5,7 +5,6 @@
 #include <NimBLEUtils.h>
 #include <NimBLEHIDDevice.h>
 #include "HIDTypes.h"
-#include <driver/adc.h>
 #include "sdkconfig.h"
 #include "layouts/KeyboardLayout.h"
 
