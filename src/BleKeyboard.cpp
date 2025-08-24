@@ -93,7 +93,10 @@ BleKeyboard::BleKeyboard(std::string deviceName, std::string deviceManufacturer,
     , deviceName(std::string(deviceName).substr(0, 15))
     , deviceManufacturer(std::string(deviceManufacturer).substr(0,15))
     , batteryLevel(batteryLevel)
-    , _asciimap(KeyboardLayout_en_US) {}
+    , _asciimap(KeyboardLayout_en_US)
+{
+    releaseAll();
+}
 
 // <-- FIX: Implement the virtual destructor
 BleKeyboard::~BleKeyboard() {}
@@ -368,9 +371,9 @@ void BleKeyboard::releaseAll(void)
 
 size_t BleKeyboard::write(uint8_t c)
 {
-	uint8_t p = press(c);  // Keydown
-	release(c);            // Keyup
-	return p;              // just return the result of press() since release() almost always returns 1
+	uint8_t p = press(c);
+	releaseAll();
+	return p;
 }
 
 size_t BleKeyboard::write(const MediaKeyReport c)
