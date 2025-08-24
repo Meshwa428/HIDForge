@@ -411,7 +411,7 @@ void BleKeyboard::onAuthenticationComplete(ble_gap_conn_desc* desc)
 {
     if(!desc->sec_state.encrypted) {
         NimBLEDevice::getServer()->disconnect(desc->conn_handle);
-        ESP_LOGE(LOG_TAG, "Encrypt connection failed: %s", NimBLEUtils::gapEventToString(desc->sec_state.reason));
+        ESP_LOGE(LOG_TAG, "Encrypt connection failed");
         return;
     }
 
