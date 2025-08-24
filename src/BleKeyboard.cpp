@@ -1,7 +1,7 @@
 #include "BleKeyboard.h"
 
 #include <NimBLEDevice.h>
-#include <NimBLEServer.hh>
+#include <NimBLEServer.h>
 #include <NimBLEUtils.h>
 #include <NimBLEHIDDevice.h>
 #include "HIDTypes.h"
