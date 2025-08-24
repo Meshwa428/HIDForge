@@ -49,36 +49,47 @@ BleMouse::BleMouse(String deviceName, String deviceManufacturer, uint8_t battery
     : hid(0), deviceName(deviceName), deviceManufacturer(deviceManufacturer), batteryLevel(batteryLevel), _buttons(0) {}
 
 void BleMouse::begin() {
-    NimBLEDevice::init(deviceName.c_str());
-    pServer = NimBLEDevice::createServer();
+    NimBLEServer* pServer = NimBLEDevice::getServer();
+    if (pServer == nullptr) {
+        ESP_LOGE(LOG_TAG, "BLE Server not found. Please start BleManager first.");
+        return;
+    }
     pServer->setCallbacks(this);
 
     hid = new NimBLEHIDDevice(pServer);
-    inputMouse = hid->inputReport(MOUSE_ID);
+    inputMouse = hid->getInputReport(MOUSE_ID);
 
-    hid->manufacturer()->setValue(deviceManufacturer.c_str());
-    hid->pnp(0x02, 0x05ac, 0x0220, 0x011b); // Apple Inc, Magic Mouse
-    hid->hidInfo(0x00, 0x02);
+    hid->setManufacturer(deviceManufacturer.c_str());
+    hid->setPnp(0x02, 0x05ac, 0x0220, 0x011b); // Apple Inc, Magic Mouse
+    hid->setHidInfo(0x00, 0x02);
 
-    NimBLEDevice::setSecurityAuth(true, true, true);
-
-    hid->reportMap((uint8_t*)_hidReportDescriptor, sizeof(_hidReportDescriptor));
+    hid->setReportMap((uint8_t*)_hidReportDescriptor, sizeof(_hidReportDescriptor));
     hid->startServices();
 
     advertising = pServer->getAdvertising();
     advertising->setAppearance(HID_MOUSE);
-    advertising->addServiceUUID(hid->hidService()->getUUID());
-    advertising->setScanResponse(true);
+    advertising->addServiceUUID(hid->getHidService()->getUUID());
+    advertising->enableScanResponse(true);
     advertising->start();
     hid->setBatteryLevel(batteryLevel);
 }
 
 void BleMouse::end() {
-    if (pServer->getConnectedCount() > 0) {
-        pServer->disconnect(pServer->getPeerInfo(0).getConnHandle());
+    NimBLEServer* pServer = NimBLEDevice::getServer();
+    if (pServer && hid) {
+        pServer->setCallbacks(nullptr);
+
+        NimBLEService* hidService = hid->getHidService();
+        NimBLEService* deviceInfoService = hid->getDeviceInfoService();
+        NimBLEService* batteryService = hid->getBatteryService();
+
+        if (hidService) pServer->removeService(hidService, true);
+        if (deviceInfoService) pServer->removeService(deviceInfoService, true);
+        if (batteryService) pServer->removeService(batteryService, true);
+
+        delete hid;
+        hid = nullptr;
     }
-    delete hid;
-    NimBLEDevice::deinit(true);
     this->connected = false;
 }
 
@@ -114,11 +125,11 @@ bool BleMouse::isConnected() {
     return this->connected;
 }
 
-void BleMouse::onConnect(NimBLEServer* pServer) {
+void BleMouse::onConnect(NimBLEServer* pServer, NimBLEConnInfo& connInfo) {
     ESP_LOGI(LOG_TAG, "Client connection initiated, waiting for pairing...");
 }
 
-void BleMouse::onDisconnect(NimBLEServer* pServer) {
+void BleMouse::onDisconnect(NimBLEServer* pServer, NimBLEConnInfo& connInfo, int reason) {
     this->connected = false;
     ESP_LOGI(LOG_TAG, "Client disconnected");
 }

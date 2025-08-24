@@ -8,13 +8,13 @@
 #include <NimBLEDevice.h>
 #include <NimBLEHIDDevice.h>
 #include <NimBLEServer.h>
+#include "NimBLEConnInfo.h"
 
 class BleMouse : public NimBLEServerCallbacks, public MouseInterface {
 private:
     NimBLEHIDDevice* hid;
     NimBLECharacteristic* inputMouse;
     NimBLEAdvertising* advertising;
-    NimBLEServer* pServer;
     
     uint8_t _buttons;
     bool connected = false;
@@ -25,8 +25,8 @@ private:
     void sendReport();
 
 protected:
-    virtual void onConnect(NimBLEServer* pServer) override;
-    virtual void onDisconnect(NimBLEServer* pServer) override;
+    void onConnect(NimBLEServer* pServer, NimBLEConnInfo& connInfo) override;
+    void onDisconnect(NimBLEServer* pServer, NimBLEConnInfo& connInfo, int reason) override;
     virtual void onAuthenticationComplete(ble_gap_conn_desc* desc);
 
 public:
