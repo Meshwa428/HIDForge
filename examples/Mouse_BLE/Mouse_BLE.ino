@@ -1,13 +1,17 @@
 #include <Arduino.h>
-#include <BadKB.h>
+#include "BleManager.h"
+#include "BleMouse.h"
 
-BleMouse mouse("BadKB BLE Mouse");
+BleManager bleManager;
+BleMouse mouse("HIDForge BLE Mouse");
 
 void setup() {
   Serial.begin(115200);
   delay(1000);
 
+  bleManager.start();
   mouse.begin();
+
   Serial.println("Starting BLE Mouse Example...");
   Serial.println("Waiting for a device to connect and pair...");
 }

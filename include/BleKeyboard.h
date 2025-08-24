@@ -70,6 +70,7 @@ protected:
   virtual void onStarted(NimBLEServer *pServer) { };
   void onConnect(NimBLEServer* pServer, NimBLEConnInfo& connInfo) override;
   void onDisconnect(NimBLEServer* pServer, NimBLEConnInfo& connInfo, int reason) override;
+  void onAuthenticationComplete(ble_gap_conn_desc* desc);
   void onWrite(NimBLECharacteristic* pCharacteristic, NimBLEConnInfo& connInfo) override;
 };
 
