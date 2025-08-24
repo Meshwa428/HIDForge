@@ -32,26 +32,6 @@ void loop() {
   bleManager.stopKeyboard();
   Serial.println("Keyboard stopped.");
 
-  delay(5000); // Wait 5 seconds before restarting
-
-  Serial.println("Restarting keyboard...");
-  keyboard = bleManager.startKeyboard();
-
-  if (keyboard) {
-    Serial.println("Keyboard restarted. Waiting for connection...");
-    while(!keyboard->isConnected()) {
-      delay(100);
-    }
-    Serial.println("Keyboard connected. Sending 'World'");
-    keyboard->print("World");
-    delay(2000);
-  } else {
-    Serial.println("Failed to restart keyboard");
-  }
-
-  Serial.println("Stopping keyboard...");
-  bleManager.stopKeyboard();
-  Serial.println("Keyboard stopped.");
-
+  Serial.println("Waiting 5 seconds before restarting...");
   delay(5000);
 }

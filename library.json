@@ -20,7 +20,7 @@
   "frameworks": "arduino",
   "platforms": "espressif32",
   "dependencies": {
-    "h2zero/NimBLE-Arduino": "^2.3.3"
+    "h2zero/NimBLE-Arduino": "^1.4.3"
   },
   "build": {
     "libArchive": false,

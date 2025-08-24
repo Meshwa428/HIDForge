@@ -63,6 +63,7 @@ public:
   void set_vendor_id(uint16_t vid);
   void set_product_id(uint16_t pid);
   void set_version(uint16_t version);
+  void setWriteError(void);
 protected:
   virtual void onStarted(NimBLEServer *pServer) { };
   void onConnect(NimBLEServer* pServer, NimBLEConnInfo& connInfo) override;
