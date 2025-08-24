@@ -32,6 +32,7 @@ private:
   uint8_t            batteryLevel;
   bool               connected = false;
   uint32_t           _delay_ms = 7;
+  const uint8_t*     _asciimap;
   void delay_ms(uint64_t ms);
 
   uint16_t vid       = 0x05ac;
@@ -63,6 +64,7 @@ public:
   void set_vendor_id(uint16_t vid);
   void set_product_id(uint16_t pid);
   void set_version(uint16_t version);
+  void setLayout(const uint8_t* layout);
   void setWriteError(void);
 protected:
   virtual void onStarted(NimBLEServer *pServer) { };

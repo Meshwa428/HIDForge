@@ -94,6 +94,7 @@ bool BleHid::isConnected() {
 }
 
 void BleHid::setLayout(const uint8_t *layout) {
-    // This function is here to satisfy the HIDInterface, but it does nothing,
-    // because the user-provided BleKeyboard does not support layouts.
+    if (bleKeyboard_) {
+        bleKeyboard_->setLayout(layout);
+    }
 }
