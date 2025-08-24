@@ -399,11 +399,24 @@ size_t BleKeyboard::write(const uint8_t *buffer, size_t size) {
 }
 
 void BleKeyboard::onConnect(NimBLEServer* pServer, NimBLEConnInfo& connInfo) {
-  this->connected = true;
+  ESP_LOGI(LOG_TAG, "Client connected");
 }
 
 void BleKeyboard::onDisconnect(NimBLEServer* pServer, NimBLEConnInfo& connInfo, int reason) {
   this->connected = false;
+  ESP_LOGI(LOG_TAG, "Client disconnected");
+}
+
+void BleKeyboard::onAuthenticationComplete(ble_gap_conn_desc* desc)
+{
+    if(!desc->sec_state.encrypted) {
+        NimBLEDevice::getServer()->disconnect(desc->conn_handle);
+        ESP_LOGE(LOG_TAG, "Encrypt connection failed: %s", NimBLEUtils::gapEventToString(desc->sec_state.reason));
+        return;
+    }
+
+    ESP_LOGI(LOG_TAG, "Paired successfully");
+    this->connected = true;
 }
 
 
