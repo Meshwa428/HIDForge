@@ -105,32 +105,36 @@ This example creates a wireless mouse that moves in a circle when a device is co
 
 // 1. Create a BleManager to handle the BLE stack
 BleManager bleManager;
-
-// 2. Create a BLE mouse instance with a custom name
-BleMouse mouse("HIDForge BLE Mouse");
+BleMouse* mouse = nullptr;
 
 void setup() {
   Serial.begin(115200);
   delay(1000);
 
-  // 3. Start the BLE stack using the manager
-  bleManager.start();
+  // 2. Setup the BleManager
+  bleManager.setup();
 
-  // 4. Initialize the mouse. This will now attach to the existing BLE stack.
-  mouse.begin();
+  // 3. Start the mouse. This will start the BLE stack if not already running.
+  mouse = bleManager.startMouse();
 
   Serial.println("Starting BLE Mouse Example...");
   Serial.println("Waiting for a device to connect and pair...");
+
+  if(mouse) {
+    while(!mouse->isConnected()) {
+      delay(100);
+    }
+  }
 }
 
 void loop() {
-  // 5. Check if a host is connected
-  if (mouse.isConnected()) {
+  // 4. Check if a host is connected
+  if (bleManager.isMouseConnected()) {
     // Move the mouse in a circle
     for (int i = 0; i < 360; i += 15) {
       int x = 20 * cos(i * PI / 180);
       int y = 20 * sin(i * PI / 180);
-      mouse.move(x, y);
+      mouse->move(x, y);
       delay(50);
     }
   }
@@ -144,7 +148,7 @@ Check out the `examples/` directory for more, including the new **Composite_HID_
 (A more detailed API reference can be found in the project's documentation)
 
 ### Core Classes
--   `BleManager`: For managing the BLE stack lifecycle.
+-   `BleManager`: For managing the BLE keyboard and mouse lifecycle.
 -   `UsbHid` / `BleHid`: For keyboard emulation over USB or BLE. The `BleHid` class is now an adapter for `BleKeyboard`.
 -   `BleKeyboard`: A self-contained BLE keyboard implementation.
 -   `UsbMouse` / `BleMouse`: For mouse emulation over USB or BLE.
@@ -168,29 +172,31 @@ A full list of key codes can be found in `src/common/keys.h`.
 
 The `BleManager` is a new class that simplifies the management of the BLE stack. It runs the BLE stack in a separate FreeRTOS task, and it handles the initialization and de-initialization of the NimBLE stack.
 
-**Starting the BLE stack:**
+**Starting and Stopping Devices:**
 ```cpp
 #include <HIDForge.h>
 
 BleManager bleManager;
 
 void setup() {
-  // Start the BLE stack. This should be done once.
-  bleManager.start();
+  bleManager.setup();
 
-  // Now you can create and begin your BLE HID devices
-  BleKeyboard keyboard;
-  keyboard.begin();
+  // Start the keyboard. This will also start the BLE stack if not already running.
+  BleKeyboard* keyboard = bleManager.startKeyboard();
 
-  BleMouse mouse;
-  mouse.begin();
+  // Start the mouse.
+  BleMouse* mouse = bleManager.startMouse();
 }
-```
 
-**Stopping the BLE stack:**
-```cpp
-// This will stop the BLE stack and all advertising.
-bleManager.stop();
+void loop() {
+  // ... use keyboard and mouse objects
+
+  // Stop the keyboard
+  bleManager.stopKeyboard();
+
+  // Stop the mouse. This will also stop the BLE stack as it's the last device.
+  bleManager.stopMouse();
+}
 ```
 
 ## Contributing

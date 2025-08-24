@@ -7,7 +7,6 @@
 
 
 BleManager bleManager;
-BleKeyboard keyboard("DuckyBLE");
 
 // A simple DuckyScript to be executed
 const char* duckyScript = R"SCRIPT(
@@ -78,23 +77,29 @@ void setup() {
   Serial.begin(115200);
   delay(1000);
 
-  bleManager.start();
-  keyboard.begin();
+  bleManager.setup();
+  BleKeyboard* keyboard = bleManager.startKeyboard();
 
-  BleHid hid(&keyboard);
-  hid.begin(KeyboardLayout_en_US);
+  if (keyboard) {
+    BleHid hid(keyboard);
+    hid.begin(KeyboardLayout_en_US);
 
-  Serial.println("Starting DuckyScript over BLE...");
-  Serial.println("Waiting for a device to connect...");
+    Serial.println("Starting DuckyScript over BLE...");
+    Serial.println("Waiting for a device to connect...");
 
-  while(!hid.isConnected()) {
-      delay(100);
+    while(!hid.isConnected()) {
+        delay(100);
+    }
+
+    Serial.println("BLE Keyboard Connected. Running script in 3 seconds...");
+    delay(3000);
+
+    parseDuckyScript(hid, duckyScript);
+
+  } else {
+    Serial.println("Failed to start keyboard");
   }
 
-  Serial.println("BLE Keyboard Connected. Running script in 3 seconds...");
-  delay(3000);
-
-  parseDuckyScript(hid, duckyScript);
 
   Serial.println("Script finished.");
 }
