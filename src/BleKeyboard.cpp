@@ -406,15 +406,16 @@ void BleKeyboard::onDisconnect(NimBLEServer* pServer, NimBLEConnInfo& connInfo, 
   ESP_LOGI(LOG_TAG, "Client disconnected");
 }
 
-void BleKeyboard::onAuthenticationComplete(ble_gap_conn_desc* desc)
+void BleKeyboard::onAuthenticationComplete(NimBLEConnInfo& connInfo)
 {
-    if(!desc->sec_state.encrypted) {
-        NimBLEDevice::getServer()->disconnect(desc->conn_handle);
-        ESP_LOGE(LOG_TAG, "Encrypt connection failed");
+    if(!connInfo.isEncrypted()) {
+        // This shouldn't happen, but just in case.
+        NimBLEDevice::getServer()->disconnect(connInfo.getConnHandle());
+        ESP_LOGE(LOG_TAG, "Authentication complete but connection not encrypted");
         return;
     }
 
-    ESP_LOGI(LOG_TAG, "Paired successfully");
+    ESP_LOGI(LOG_TAG, "Authentication complete");
     this->connected = true;
 }
 

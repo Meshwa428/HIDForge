@@ -30,7 +30,7 @@ private:
   std::string        deviceName;
   std::string        deviceManufacturer;
   uint8_t            batteryLevel;
-  bool               connected = false;
+  volatile bool      connected = false;
   uint32_t           _delay_ms = 7;
   const uint8_t*     _asciimap;
   void delay_ms(uint64_t ms);
@@ -70,7 +70,7 @@ protected:
   virtual void onStarted(NimBLEServer *pServer) { };
   void onConnect(NimBLEServer* pServer, NimBLEConnInfo& connInfo) override;
   void onDisconnect(NimBLEServer* pServer, NimBLEConnInfo& connInfo, int reason) override;
-  void onAuthenticationComplete(ble_gap_conn_desc* desc);
+  void onAuthenticationComplete(NimBLEConnInfo& connInfo) override;
   void onWrite(NimBLECharacteristic* pCharacteristic, NimBLEConnInfo& connInfo) override;
 };
 
