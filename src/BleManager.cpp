@@ -1,6 +1,7 @@
 #include "BleManager.h"
 #include <NimBLEDevice.h>
-#include <BleKeyboard.h>
+#include "BleKeyboard.h"
+#include "BleMouse.h"
 
 BleManager::BleManager() :
     bleTaskHandle_(nullptr),
@@ -8,7 +9,9 @@ BleManager::BleManager() :
     stopSemaphore_(nullptr),
     currentState_(State::IDLE),
     startKeyboardRequested_(false),
-    stopKeyboardRequested_(false)
+    stopKeyboardRequested_(false),
+    startMouseRequested_(false),
+    stopMouseRequested_(false)
 {}
 
 BleManager::~BleManager() {
@@ -33,40 +36,50 @@ void BleManager::setup() {
 }
 
 BleKeyboard* BleManager::startKeyboard() {
-    if (currentState_ != State::IDLE) {
+    if (currentState_ == State::ACTIVE && bleKeyboard_) {
         return bleKeyboard_.get();
     }
-
     startKeyboardRequested_ = true;
-
     if (xSemaphoreTake(startSemaphore_, pdMS_TO_TICKS(5000)) == pdTRUE) {
         return bleKeyboard_.get();
-    } else {
-        startKeyboardRequested_ = false;
-        return nullptr;
     }
+    return nullptr;
+}
+
+BleMouse* BleManager::startMouse() {
+    if (currentState_ == State::ACTIVE && bleMouse_) {
+        return bleMouse_.get();
+    }
+    startMouseRequested_ = true;
+    if (xSemaphoreTake(startSemaphore_, pdMS_TO_TICKS(5000)) == pdTRUE) {
+        return bleMouse_.get();
+    }
+    return nullptr;
 }
 
 void BleManager::stopKeyboard() {
-    if (currentState_ != State::KEYBOARD_ACTIVE) {
-        return;
-    }
+    if (!bleKeyboard_) return;
     stopKeyboardRequested_ = true;
+    xSemaphoreTake(stopSemaphore_, pdMS_TO_TICKS(2000));
+}
 
+void BleManager::stopMouse() {
+    if (!bleMouse_) return;
+    stopMouseRequested_ = true;
     xSemaphoreTake(stopSemaphore_, pdMS_TO_TICKS(2000));
 }
 
 bool BleManager::isKeyboardConnected() const {
-    if (bleKeyboard_ && currentState_ == State::KEYBOARD_ACTIVE) {
-        return bleKeyboard_->isConnected();
-    }
-    return false;
+    return bleKeyboard_ && bleKeyboard_->isConnected();
+}
+
+bool BleManager::isMouseConnected() const {
+    return bleMouse_ && bleMouse_->isConnected();
 }
 
 BleManager::State BleManager::getState() const {
     return currentState_;
 }
-
 
 void BleManager::bleTaskWrapper(void* param) {
     static_cast<BleManager*>(param)->taskLoop();
@@ -74,55 +87,80 @@ void BleManager::bleTaskWrapper(void* param) {
 
 void BleManager::taskLoop() {
     NimBLEServer *pServer = nullptr;
-    currentState_ = State::IDLE;
 
     for (;;) {
-        if (currentState_ == State::IDLE && startKeyboardRequested_) {
-            if(!NimBLEDevice::init("")) {
-                bleKeyboard_.reset();
-            } else {
-                pServer = NimBLEDevice::createServer();
-                bleKeyboard_.reset(new BleKeyboard("Kiva Ducky", "Kiva Systems", 100));
-                bleKeyboard_->begin();
-                currentState_ = State::KEYBOARD_ACTIVE;
+        // --- HANDLE STARTUP REQUESTS ---
+        if (startKeyboardRequested_ || startMouseRequested_) {
+            if (currentState_ == State::IDLE) {
+                if(NimBLEDevice::init("")) {
+                    pServer = NimBLEDevice::createServer();
+                    currentState_ = State::ACTIVE;
+                } else {
+                    // Initialization failed, clear requests and unblock caller
+                    bleKeyboard_.reset();
+                    bleMouse_.reset();
+                    startKeyboardRequested_ = false;
+                    startMouseRequested_ = false;
+                    xSemaphoreGive(startSemaphore_);
+                    goto loop_delay; // Skip to end of loop
+                }
             }
 
-            startKeyboardRequested_ = false;
+            if (startKeyboardRequested_) {
+                if (!bleKeyboard_) {
+                    bleKeyboard_ = std::make_unique<BleKeyboard>();
+                    bleKeyboard_->begin();
+                }
+                startKeyboardRequested_ = false;
+            }
+
+            if (startMouseRequested_) {
+                if (!bleMouse_) {
+                    bleMouse_ = std::make_unique<BleMouse>();
+                    bleMouse_->begin();
+                }
+                startMouseRequested_ = false;
+            }
+            
             xSemaphoreGive(startSemaphore_);
-
-        } else if (currentState_ == State::KEYBOARD_ACTIVE && stopKeyboardRequested_) {
-            // --- THIS IS THE CORRECTED, SAFE SHUTDOWN SEQUENCE ---
-            // 1. Stop advertising and disconnect clients (part of NimBLE state)
-            if (pServer && pServer->getAdvertising()->isAdvertising()) {
-                pServer->getAdvertising()->stop();
+        }
+        // --- HANDLE SHUTDOWN REQUESTS ---
+        else if (stopKeyboardRequested_ || stopMouseRequested_) {
+            if (stopKeyboardRequested_) {
+                if(bleKeyboard_) {
+                    bleKeyboard_->end();
+                    bleKeyboard_.reset();
+                }
+                stopKeyboardRequested_ = false;
             }
-            if (pServer && pServer->getConnectedCount() > 0) {
-                 auto peerDevices = pServer->getPeerDevices();
-                 for(auto& peer : peerDevices) pServer->disconnect(peer);
-                 vTaskDelay(pdMS_TO_TICKS(200));
-            }
-
-            // 2. Clean up services and HID device *within* the keyboard object.
-            // The BleKeyboard object itself still exists.
-            if(bleKeyboard_) {
-                bleKeyboard_->end();
-            }
-
-            // 3. De-initialize the entire NimBLE stack. This correctly cleans up
-            // the server and removes its internal pointer to our BleKeyboard object.
-            if(NimBLEDevice::isInitialized()) {
-                NimBLEDevice::deinit(true);
+            if (stopMouseRequested_) {
+                if(bleMouse_) {
+                    bleMouse_->end();
+                    bleMouse_.reset();
+                }
+                stopMouseRequested_ = false;
             }
 
-            // 4. NOW it is safe to destroy the BleKeyboard C++ object.
-            bleKeyboard_.reset();
-
-            pServer = nullptr;
-            currentState_ = State::IDLE;
-            stopKeyboardRequested_ = false;
-            xSemaphoreGive(stopSemaphore_); // Unblock main thread
+            // If no devices are left, shut down the entire BLE stack
+            if (!bleKeyboard_ && !bleMouse_ && currentState_ == State::ACTIVE) {
+                if (pServer && pServer->getAdvertising()->isAdvertising()) {
+                    pServer->getAdvertising()->stop();
+                }
+                if (pServer && pServer->getConnectedCount() > 0) {
+                     auto peerDevices = pServer->getPeerDevices();
+                     for(auto& peer : peerDevices) pServer->disconnect(peer);
+                     vTaskDelay(pdMS_TO_TICKS(200));
+                }
+                if(NimBLEDevice::isInitialized()) {
+                    NimBLEDevice::deinit(true);
+                }
+                pServer = nullptr;
+                currentState_ = State::IDLE;
+            }
+            xSemaphoreGive(stopSemaphore_);
         }
 
+    loop_delay:
         vTaskDelay(pdMS_TO_TICKS(50));
     }
 }
