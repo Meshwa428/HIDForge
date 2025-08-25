@@ -134,15 +134,17 @@ void BleMouse::onDisconnect(NimBLEServer* pServer, NimBLEConnInfo& connInfo, int
     ESP_LOGI(LOG_TAG, "Client disconnected");
 }
 
-void BleMouse::onAuthenticationComplete(ble_gap_conn_desc* desc) {
-    if (desc->sec_state.encrypted) {
-        ESP_LOGI(LOG_TAG, "Paired successfully. HID ready.");
-        this->connected = true;
-    } else {
-        ESP_LOGE(LOG_TAG, "Pairing failed");
-        this->connected = false;
-        NimBLEDevice::getServer()->disconnect(desc->conn_handle);
+void BleMouse::onAuthenticationComplete(NimBLEConnInfo& connInfo)
+{
+    if(!connInfo.isEncrypted()) {
+        // This shouldn't happen, but just in case.
+        NimBLEDevice::getServer()->disconnect(connInfo.getConnHandle());
+        ESP_LOGE(LOG_TAG, "Authentication complete but connection not encrypted");
+        return;
     }
+
+    ESP_LOGI(LOG_TAG, "Authentication complete");
+    this->connected = true;
 }
 
 #endif // CONFIG_BT_ENABLED
