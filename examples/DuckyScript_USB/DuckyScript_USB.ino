@@ -1,5 +1,5 @@
 #include <Arduino.h>
-#include <BadKB.h>
+#include <HIDForge.h> // Correct main header
 
 UsbHid keyboard;
 
@@ -73,6 +73,8 @@ void setup() {
   delay(1000);
 
   keyboard.begin(KeyboardLayout_en_US);
+  USB.begin(); // <-- IMPORTANT: Start the USB stack
+
   Serial.println("Starting DuckyScript over USB...");
 
   while(!keyboard.isConnected()) {

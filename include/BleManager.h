@@ -8,12 +8,13 @@
 #include "freertos/semphr.h"
 
 class BleKeyboard;
+class BleMouse; // Forward declare BleMouse
 
 class BleManager {
 public:
     enum class State {
         IDLE,           // Stack is off
-        KEYBOARD_ACTIVE // Stack is on and keyboard services are running
+        ACTIVE          // Stack is on and one or more services are running
     };
 
     BleManager();
@@ -23,15 +24,21 @@ public:
 
     // --- REVISED Public API ---
     // Returns a valid keyboard pointer on success, nullptr on failure.
-    // This function BLOCKS until the BLE task is fully ready.
     BleKeyboard* startKeyboard();
+    
+    // Returns a valid mouse pointer on success, nullptr on failure.
+    BleMouse* startMouse();
 
-    // This function BLOCKS until the BLE task has fully shut down.
+    // Stops the keyboard service. Shuts down BLE stack if it's the last active device.
     void stopKeyboard();
+    
+    // Stops the mouse service. Shuts down BLE stack if it's the last active device.
+    void stopMouse();
 
-    // --- Getters for UI ---
+    // --- Getters ---
     State getState() const;
     bool isKeyboardConnected() const;
+    bool isMouseConnected() const;
 
 private:
     static void bleTaskWrapper(void* param);
@@ -44,9 +51,12 @@ private:
     volatile State currentState_;
     volatile bool startKeyboardRequested_;
     volatile bool stopKeyboardRequested_;
+    volatile bool startMouseRequested_;
+    volatile bool stopMouseRequested_;
 
-    // unique_ptr to manage the keyboard object's lifetime
+    // unique_ptr to manage device object lifetimes
     std::unique_ptr<BleKeyboard> bleKeyboard_;
+    std::unique_ptr<BleMouse> bleMouse_;
 };
 
 #endif // BLE_MANAGER_H

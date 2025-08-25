@@ -1,10 +1,5 @@
 #include <Arduino.h>
-#include "BleManager.h"
-#include "BleKeyboard.h"
-#include "BleHid.h"
-#include "HIDInterface.h"
-#include "layouts/KeyboardLayout.h"
-
+#include <HIDForge.h> // Use the main library header
 
 BleManager bleManager;
 

@@ -12,6 +12,7 @@
 #include "UsbMsc.h"
 #include "HIDInterface.h"
 #include "MouseInterface.h"
+#include "BleManager.h"
 
 // Common definitions and layouts
 #include "common/keys.h"

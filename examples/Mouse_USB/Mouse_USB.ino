@@ -1,5 +1,5 @@
 #include <Arduino.h>
-#include <BadKB.h>
+#include <HIDForge.h> // Correct main header
 
 UsbMouse mouse;
 
@@ -8,6 +8,8 @@ void setup() {
   delay(1000);
 
   mouse.begin();
+  USB.begin(); // <-- IMPORTANT: Start the USB stack
+  
   Serial.println("Starting USB Mouse Example...");
 
   while(!mouse.isConnected()) {

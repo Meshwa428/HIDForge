@@ -1,5 +1,5 @@
 #include <Arduino.h>
-#include <BadKB.h>
+#include <HIDForge.h> // Correct main header
 
 UsbHid keyboard;
 
@@ -9,6 +9,8 @@ void setup() {
 
   // Initialize USB HID with the US layout
   keyboard.begin(KeyboardLayout_en_US);
+  USB.begin(); // <-- IMPORTANT: Start the USB stack
+  
   Serial.println("Starting USB Keyboard Example...");
 
   // Wait for the USB device to be connected and ready
@@ -20,7 +22,7 @@ void setup() {
   delay(3000); // Give user time to focus a text editor
 
   // Type a message
-  keyboard.println("Hello from BruceBadUSB!");
+  keyboard.println("Hello from HIDForge!");
   
   // Use modifier keys to open the Run dialog on Windows (Win + R)
   keyboard.press(KEY_LEFT_GUI);
@@ -31,8 +33,7 @@ void setup() {
   
   // Type a command and press Enter
   keyboard.println("notepad.exe");
-  keyboard.press(KEY_RETURN);
-  keyboard.release(KEY_RETURN);
+  keyboard.write(KEY_RETURN); // Use write() for a single press-and-release
 
   Serial.println("Done.");
 }
