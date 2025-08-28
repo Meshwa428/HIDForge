@@ -32,6 +32,7 @@ void UsbMsc::onEject(std::function<void()> callback) {
 
 
 void UsbMsc::end(void) {
+    msc.mediaPresent(false);
     msc.end();
 }
 
