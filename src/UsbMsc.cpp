@@ -32,7 +32,7 @@ void UsbMsc::onEject(std::function<void()> callback) {
 
 
 void UsbMsc::end(void) {
-    // msc.end(); // This can be problematic, manage eject state if needed.
+    msc.end();
 }
 
 int32_t UsbMsc::onWrite(uint32_t lba, uint32_t offset, uint8_t *buffer, uint32_t bufsize) {
