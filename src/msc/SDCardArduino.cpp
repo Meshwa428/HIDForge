@@ -3,11 +3,10 @@
 #include <SPI.h>
 #include <SD.h>
 
-SDCardArduino::SDCardArduino(Stream &debug, const char *mount_point, gpio_num_t miso, gpio_num_t mosi, gpio_num_t clk, gpio_num_t cs)
+SDCardArduino::SDCardArduino(Stream &debug, const char *mount_point, gpio_num_t cs)
     : SDCard(debug, mount_point)
 {
   static SPIClass spi(HSPI);
-  spi.begin(clk, miso, mosi, cs);
   if (SD.begin(cs, spi, 80000000, mount_point))
   {
     debug.println("SD card initialized");
