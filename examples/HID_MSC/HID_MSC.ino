@@ -3,11 +3,6 @@
 #include <SPI.h>
 #include <SD.h>
 
-// --- IMPORTANT ---
-// Please define your board's SD Card pins here.
-// The example pins below are for a generic ESP32-S3 module.
-// Using an incorrect pinout will prevent the SD card from working.
-
 // For SPI Mode
 #define SD_CS   GPIO_NUM_21
 #define SD_SCK  GPIO_NUM_7
@@ -22,7 +17,6 @@
 // #define SD_D2   GPIO_NUM_33
 // #define SD_D3   GPIO_NUM_34
 
-UsbHid keyboard;
 UsbMsc storage;
 SDCard* card = nullptr;
 
@@ -50,30 +44,11 @@ void setup() {
   }
 
   card->printCardInfo();
-
-  // 1. Begin individual USB components
-  keyboard.begin(KeyboardLayout_en_US);
   storage.begin(card);
 
-  // 2. Start the USB stack with all configured components
   USB.begin();
 
-  Serial.println("USB Composite device started.");
-
-  // Wait for the host to connect to the keyboard
-  while(!keyboard.isConnected()) {
-    delay(100);
-  }
-
-  Serial.println("USB HID Connected. Typing in 5 seconds...");
-  Serial.println("The SD card should also be visible as a USB drive.");
-  delay(5000);
-
-  // Send some keystrokes
-  keyboard.println("Hello from a composite HID+MSC device!");
-  keyboard.println("You should see this text AND a USB drive containing the SD card's contents.");
-  
-  Serial.println("Done.");
+  Serial.println("USB device started.");
 }
 
 void loop() {

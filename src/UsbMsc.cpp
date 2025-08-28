@@ -6,15 +6,15 @@ SDCard* UsbMsc::_card = nullptr;
 
 UsbMsc::UsbMsc(void) {}
 
-void UsbMsc::begin(SDCard* card) {
+void UsbMsc::begin(SDCard* card, const char* vendor_id, const char* product_id, const char* product_revision) {
     _card = card;
     if (!_card || _card->getSectorCount() == 0) {
         return;
     }
 
-    msc.vendorID("HIDForge");
-    msc.productID("SD_MSC");
-    msc.productRevision("1.0");
+    msc.vendorID(vendor_id);
+    msc.productID(product_id);
+    msc.productRevision(product_revision);
     msc.onRead(onRead);
     msc.onWrite(onWrite);
     msc.onStartStop(onStartStop);

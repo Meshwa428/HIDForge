@@ -18,7 +18,7 @@ private:
 
 public:
     UsbMsc(void);
-    void begin(SDCard* card);
+    void begin(SDCard* card, const char* vendor_id, const char* product_id, const char* product_revision);
     void end(void);
 };
 
