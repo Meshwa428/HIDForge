@@ -2,10 +2,13 @@
 
 #if CONFIG_TINYUSB_MSC_ENABLED
 
+// --- INITIALIZE THE NEW STATIC MEMBERS ---
 SDCard* UsbMsc::_card = nullptr;
+std::function<void()> UsbMsc::onEjectCallback_ = nullptr;
 
 UsbMsc::UsbMsc(void) {}
 
+// --- MODIFIED: Added default arguments to match the header ---
 void UsbMsc::begin(SDCard* card, const char* vendor_id, const char* product_id, const char* product_revision) {
     _card = card;
     if (!_card || _card->getSectorCount() == 0) {
@@ -21,6 +24,12 @@ void UsbMsc::begin(SDCard* card, const char* vendor_id, const char* product_id, 
     msc.mediaPresent(true);
     msc.begin(_card->getSectorCount(), _card->getSectorSize());
 }
+
+// --- ADD THIS METHOD IMPLEMENTATION ---
+void UsbMsc::onEject(std::function<void()> callback) {
+    onEjectCallback_ = callback;
+}
+
 
 void UsbMsc::end(void) {
     // msc.end(); // This can be problematic, manage eject state if needed.
@@ -41,7 +50,12 @@ int32_t UsbMsc::onRead(uint32_t lba, uint32_t offset, void *buffer, uint32_t buf
 }
 
 bool UsbMsc::onStartStop(uint8_t power_condition, bool start, bool load_eject) {
-    // The host is asking to eject the media.
+    // --- MODIFIED: Call the callback on eject ---
+    if (load_eject && !start) { // This condition signifies an eject event
+        if (onEjectCallback_) {
+            onEjectCallback_();
+        }
+    }
     return true;
 }
 
