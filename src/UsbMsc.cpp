@@ -25,15 +25,17 @@ void UsbMsc::begin(SDCard* card, const char* vendor_id, const char* product_id, 
     msc.begin(_card->getSectorCount(), _card->getSectorSize());
 }
 
-// --- ADD THIS METHOD IMPLEMENTATION ---
 void UsbMsc::onEject(std::function<void()> callback) {
     onEjectCallback_ = callback;
 }
 
-
 void UsbMsc::end(void) {
     msc.mediaPresent(false);
     msc.end();
+}
+
+void UsbMsc::mediaPresent(bool present) {
+    msc.mediaPresent(present);
 }
 
 int32_t UsbMsc::onWrite(uint32_t lba, uint32_t offset, uint8_t *buffer, uint32_t bufsize) {

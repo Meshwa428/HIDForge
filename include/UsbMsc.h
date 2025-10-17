@@ -23,9 +23,9 @@ public:
     UsbMsc(void);
     void begin(SDCard* card, const char* vendor_id = "HIDForge", const char* product_id = "MSC", const char* product_revision = "1.0");
     void end(void);
-    
-    // --- ADD THIS PUBLIC METHOD ---
     void onEject(std::function<void()> callback);
+    
+    void mediaPresent(bool present);
 };
 
 #endif // CONFIG_TINYUSB_MSC_ENABLED
