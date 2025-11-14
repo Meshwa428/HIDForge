@@ -1,3 +1,5 @@
+// HIDForge/include/BleMouse.h
+
 #ifndef HIDFORGE_BLE_MOUSE_H
 #define HIDFORGE_BLE_MOUSE_H
 
@@ -31,6 +33,7 @@ protected:
 
 public:
     BleMouse(String deviceName = "HIDForge Mouse", String deviceManufacturer = "HIDForge", uint8_t batteryLevel = 100);
+    virtual ~BleMouse() = default; // Make destructor virtual
     
     void begin() override;
     void end() override;

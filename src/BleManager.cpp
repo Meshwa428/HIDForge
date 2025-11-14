@@ -1,7 +1,10 @@
+// HIDForge/src/BleManager.cpp
+
 #include "BleManager.h"
 #include <NimBLEDevice.h>
 #include "BleKeyboard.h"
 #include "BleMouse.h"
+#include "BleHid.h" // Include the wrapper header
 
 BleManager::BleManager() :
     bleTaskHandle_(nullptr),
@@ -35,18 +38,20 @@ void BleManager::setup() {
     );
 }
 
-BleKeyboard* BleManager::startKeyboard() {
-    if (currentState_ == State::ACTIVE && bleKeyboard_) {
-        return bleKeyboard_.get();
+// Returns a generic, non-owning HIDInterface pointer
+HIDInterface* BleManager::startKeyboard() {
+    if (currentState_ == State::ACTIVE && bleHidWrapper_) {
+        return bleHidWrapper_.get();
     }
     startKeyboardRequested_ = true;
     if (xSemaphoreTake(startSemaphore_, pdMS_TO_TICKS(5000)) == pdTRUE) {
-        return bleKeyboard_.get();
+        return bleHidWrapper_.get();
     }
     return nullptr;
 }
 
-BleMouse* BleManager::startMouse() {
+// Returns a generic, non-owning MouseInterface pointer
+MouseInterface* BleManager::startMouse() {
     if (currentState_ == State::ACTIVE && bleMouse_) {
         return bleMouse_.get();
     }
@@ -96,13 +101,13 @@ void BleManager::taskLoop() {
                     pServer = NimBLEDevice::createServer();
                     currentState_ = State::ACTIVE;
                 } else {
-                    // Initialization failed, clear requests and unblock caller
                     bleKeyboard_.reset();
+                    bleHidWrapper_.reset();
                     bleMouse_.reset();
                     startKeyboardRequested_ = false;
                     startMouseRequested_ = false;
                     xSemaphoreGive(startSemaphore_);
-                    goto loop_delay; // Skip to end of loop
+                    goto loop_delay;
                 }
             }
 
@@ -110,6 +115,7 @@ void BleManager::taskLoop() {
                 if (!bleKeyboard_) {
                     bleKeyboard_ = std::make_unique<BleKeyboard>();
                     bleKeyboard_->begin();
+                    bleHidWrapper_ = std::make_unique<BleHid>(bleKeyboard_.get());
                 }
                 startKeyboardRequested_ = false;
             }
@@ -129,7 +135,8 @@ void BleManager::taskLoop() {
             if (stopKeyboardRequested_) {
                 if(bleKeyboard_) {
                     bleKeyboard_->end();
-                    bleKeyboard_.reset();
+                    bleHidWrapper_.reset(); // Destroy wrapper first
+                    bleKeyboard_.reset();   // Then destroy keyboard
                 }
                 stopKeyboardRequested_ = false;
             }
@@ -141,7 +148,6 @@ void BleManager::taskLoop() {
                 stopMouseRequested_ = false;
             }
 
-            // If no devices are left, shut down the entire BLE stack
             if (!bleKeyboard_ && !bleMouse_ && currentState_ == State::ACTIVE) {
                 if (pServer && pServer->getAdvertising()->isAdvertising()) {
                     pServer->getAdvertising()->stop();

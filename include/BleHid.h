@@ -1,3 +1,5 @@
+// HIDForge/include/BleHid.h
+
 #ifndef BLE_HID_ADAPTER_H
 #define BLE_HID_ADAPTER_H
 
@@ -7,7 +9,7 @@
 class BleHid : public HIDInterface {
 public:
     BleHid(BleKeyboard* keyboard);
-    ~BleHid();
+    virtual ~BleHid(); // Make destructor virtual
 
     void begin(const uint8_t *layout = nullptr) override;
     void end(void) override;

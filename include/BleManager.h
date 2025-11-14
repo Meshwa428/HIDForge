@@ -1,3 +1,5 @@
+// HIDForge/include/BleManager.h
+
 #ifndef BLE_MANAGER_H
 #define BLE_MANAGER_H
 
@@ -6,9 +8,13 @@
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "freertos/semphr.h"
+#include "HIDInterface.h"
+#include "MouseInterface.h"
 
+// Forward declare the concrete implementation classes
 class BleKeyboard;
-class BleMouse; // Forward declare BleMouse
+class BleMouse;
+class BleHid;
 
 class BleManager {
 public:
@@ -23,19 +29,15 @@ public:
     void setup();
 
     // --- REVISED Public API ---
-    // Returns a valid keyboard pointer on success, nullptr on failure.
-    BleKeyboard* startKeyboard();
+    // Returns a NON-OWNING pointer to a generic HIDInterface.
+    HIDInterface* startKeyboard();
     
-    // Returns a valid mouse pointer on success, nullptr on failure.
-    BleMouse* startMouse();
+    // Returns a NON-OWNING pointer to a generic MouseInterface.
+    MouseInterface* startMouse();
 
-    // Stops the keyboard service. Shuts down BLE stack if it's the last active device.
     void stopKeyboard();
-    
-    // Stops the mouse service. Shuts down BLE stack if it's the last active device.
     void stopMouse();
 
-    // --- Getters ---
     State getState() const;
     bool isKeyboardConnected() const;
     bool isMouseConnected() const;
@@ -45,8 +47,8 @@ private:
     void taskLoop();
 
     TaskHandle_t bleTaskHandle_;
-    SemaphoreHandle_t startSemaphore_; // Confirms startup is complete
-    SemaphoreHandle_t stopSemaphore_;  // Confirms shutdown is complete
+    SemaphoreHandle_t startSemaphore_;
+    SemaphoreHandle_t stopSemaphore_;
 
     volatile State currentState_;
     volatile bool startKeyboardRequested_;
@@ -57,6 +59,9 @@ private:
     // unique_ptr to manage device object lifetimes
     std::unique_ptr<BleKeyboard> bleKeyboard_;
     std::unique_ptr<BleMouse> bleMouse_;
+
+    // --- NEW: unique_ptr to manage the wrapper object lifetimes ---
+    std::unique_ptr<BleHid> bleHidWrapper_;
 };
 
 #endif // BLE_MANAGER_H
