@@ -144,6 +144,7 @@ void BleMouse::onAuthenticationComplete(NimBLEConnInfo& connInfo)
     }
 
     ESP_LOGI(LOG_TAG, "Authentication complete");
+    NimBLEDevice::getServer()->updateConnParams(connInfo.getConnHandle(), 6, 12, 0, 300);
     this->connected = true;
 }
 
